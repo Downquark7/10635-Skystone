@@ -16,6 +16,7 @@ public class parkingAutonomous extends LinearOpMode {
 
     int color = 1;
     int side = 1;
+    int waitTime = 0;
 
     public void runOpMode() {
         drive = new SampleMecanumDriveREVOptimized(hardwareMap);
@@ -32,9 +33,15 @@ public class parkingAutonomous extends LinearOpMode {
                 side = 1;
             if (gamepad1.y)
                 side = -1;
+            if (gamepad1.dpad_up)
+                waitTime += 1;
+            if (gamepad1.dpad_down)
+                waitTime -= 1;
+
 
             telemetry.addData("color", color == 1 ? "red" : "blue");
             telemetry.addData("side", side == 1 ? "left" : "right");
+            telemetry.addData("Wait Time", waitTime);
             telemetry.update();
         }
 
@@ -50,7 +57,7 @@ public class parkingAutonomous extends LinearOpMode {
 //        } else {
 //           drive.setPoseEstimate(new Pose2d(63.5, -39, 0));
 //        }
-
+        sleep(waitTime * 1000);
         drive.setPoseEstimate(new Pose2d(-63.5 * color, -39, .5 * Math.PI - Math.PI * color));
         drive.followTrajectorySync(drive.trajectoryBuilder().splineTo(new Pose2d(color * -48 - 12 * side, 0, Math.PI/2)).build());
 
