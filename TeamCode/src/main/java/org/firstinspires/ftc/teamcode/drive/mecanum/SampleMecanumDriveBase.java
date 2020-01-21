@@ -1,12 +1,5 @@
 package org.firstinspires.ftc.teamcode.drive.mecanum;
 
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.BASE_CONSTRAINTS;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.TRACK_WIDTH;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kA;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kStatic;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kV;
-
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -26,10 +19,19 @@ import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 import com.acmerobotics.roadrunner.trajectory.constraints.MecanumConstraints;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.hardware.DcMotor;
+
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.BASE_CONSTRAINTS;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.TRACK_WIDTH;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kA;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kStatic;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kV;
+
+//import com.acmerobotics.dashboard.FtcDashboard;
 
 /*
  * Base class with shared functionality for sample mecanum drives. All hardware-specific details are
@@ -47,7 +49,7 @@ public abstract class SampleMecanumDriveBase extends MecanumDrive {
         FOLLOW_TRAJECTORY
     }
 
-    private FtcDashboard dashboard;
+//    private FtcDashboard dashboard;
     private NanoClock clock;
 
     private Mode mode;
@@ -65,8 +67,8 @@ public abstract class SampleMecanumDriveBase extends MecanumDrive {
     public SampleMecanumDriveBase() {
         super(kV, kA, kStatic, TRACK_WIDTH);
 
-        dashboard = FtcDashboard.getInstance();
-        dashboard.setTelemetryTransmissionInterval(25);
+//        dashboard = FtcDashboard.getInstance();
+//        dashboard.setTelemetryTransmissionInterval(25);
 
         clock = NanoClock.system();
 
@@ -195,7 +197,7 @@ public abstract class SampleMecanumDriveBase extends MecanumDrive {
             }
         }
 
-        dashboard.sendTelemetryPacket(packet);
+//        dashboard.sendTelemetryPacket(packet);
     }
 
     public void waitForIdle() {
@@ -212,7 +214,7 @@ public abstract class SampleMecanumDriveBase extends MecanumDrive {
         List<Double> positions = getWheelPositions();
         double currentTimestamp = clock.seconds();
 
-        List<Double> velocities = new ArrayList<>(positions.size());;
+        List<Double> velocities = new ArrayList<>(positions.size());
         if (lastWheelPositions != null) {
             double dt = currentTimestamp - lastTimestamp;
             for (int i = 0; i < positions.size(); i++) {

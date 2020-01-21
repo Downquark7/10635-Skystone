@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive.mecanum;
 
+import android.support.annotation.NonNull;
+
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -25,63 +27,28 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.getMotorVeloci
  * Optimized mecanum drive implementation for REV ExHs. The time savings may significantly improve
  * trajectory following performance with moderate additional complexity.
  */
-public class SampleMecanumDriveREVOptimized extends SampleMecanumDriveBase {
-    public ExpansionHubEx hub, hub2;
+public class SampleMecanumDriveREVOptimized2 extends SampleMecanumDriveBase {
+
+    private ExpansionHubEx ExpansionHub1, ExpansionHub2;
     private ExpansionHubMotor leftFront, leftRear, rightRear, rightFront;
     private List<ExpansionHubMotor> motors;
     private BNO055IMU imu;
 
-    public ExpansionHubMotor LeftLift;
-    public ExpansionHubMotor RightLift;
-    public ExpansionHubMotor LeftIntake;
-    public ExpansionHubMotor RightIntake;
-    public ExpansionHubServo Gripper;
-    public ExpansionHubServo Wrist;
-    public ExpansionHubServo Elbow;
-    public ExpansionHubServo RightHook;
-    public ExpansionHubServo LeftHook;
+    public ExpansionHubMotor LeftLift = null;
+    public ExpansionHubMotor RightLift = null;
+    public ExpansionHubMotor LeftIntake = null;
+    public ExpansionHubMotor RightIntake = null;
+    public ExpansionHubServo Gripper = null;
+    public ExpansionHubServo Wrist = null;
+    public ExpansionHubServo TopSlide = null;
+    public ExpansionHubServo RightHook = null;
+    public ExpansionHubServo LeftHook = null;
     public ExpansionHubServo LeftAngle = null;
     public ExpansionHubServo RightAngle = null;
 
-    public double GripperOpen = 1;
-    public double GripperClosed = .64;
 
-    public double ElbowCollectionPosition = .04;                                  // Dpad_up
-    public double ElbowBackLeftDepositPosition = .59;                             // B and X
-    public double ElbowFrontRightDepositPosition = .47;                           // A and Y
 
-    public double ElbowExtended = 1600;
-    public double ElbowRetract = 0.25;
-    public double ElbowExtend = 0.75;
-
-    public double WristCollectionPosition = .11;                                  // Dpad_Up
-    public double WristBackDepositPosition = .11;                                 // B
-    public double WristFrontDepositPosition = .767;                                  // Y
-    //    public double WristLeftDepositPosition = 1;                                 // X
-    public double WristRightDepositPosition = .43;                                  // A
-
-    public double LeftHookDisengaged = .42;                                          //tbd
-    public double LeftHookEngaged = .12;                                             // tbd
-
-    public double RightHookDisengaged = .32;                                         //tbd
-    public double RightHookEngaged = .62;                                            // tbd
-
-    public double LeftAngleOpen = 0.65;
-    public double LeftAngleIntake = 0.68;
-    public double LeftAngleGripped = 0.69;
-
-    public double RightAngleOpen = 0.79;
-    public double RightAngleIntake = 0.76;
-    public double RightAngleGripped = 0.75;
-
-    double SpoolDiameterIN = 1.25;
-    double LiftMotorTicksPerRotationofOuputShaft = 537.6;         // for gobilda 19.2:1 Motor
-
-    public double LiftTicksPerInch = LiftMotorTicksPerRotationofOuputShaft / (SpoolDiameterIN * Math.PI);
-
-    public double MinimumElbowMovementHeightIN = 6;
-
-    public SampleMecanumDriveREVOptimized(HardwareMap hardwareMap) {
+    public SampleMecanumDriveREVOptimized2(HardwareMap hardwareMap) {
         super();
 
         LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
@@ -89,8 +56,8 @@ public class SampleMecanumDriveREVOptimized extends SampleMecanumDriveBase {
         // TODO: adjust the names of the following hardware devices to match your configuration
         // for simplicity, we assume that the desired IMU and drive motors are on the same hub
         // if your motors are split between hubs, **you will need to add another bulk read**
-        hub = hardwareMap.get(ExpansionHubEx.class, "ExpansionHub1");
-        hub2 = hardwareMap.get(ExpansionHubEx.class, "ExpansionHub2");
+        ExpansionHub1 = hardwareMap.get(ExpansionHubEx.class, "ExpansionHub1");
+        ExpansionHub2 = hardwareMap.get(ExpansionHubEx.class, "ExpansionHub2");
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -148,14 +115,13 @@ public class SampleMecanumDriveREVOptimized extends SampleMecanumDriveBase {
 
         Gripper = hardwareMap.get(ExpansionHubServo.class, "Gripper");
         Wrist = hardwareMap.get(ExpansionHubServo.class, "Wrist");
-        Elbow = hardwareMap.get(ExpansionHubServo.class, "Elbow");
+        TopSlide = hardwareMap.get(ExpansionHubServo.class, "Elbow");
         LeftHook = hardwareMap.get(ExpansionHubServo.class, "LeftHook");
         RightHook = hardwareMap.get(ExpansionHubServo.class, "RightHook");
+
         LeftAngle = hardwareMap.get(ExpansionHubServo.class, "LeftAngle");
         RightAngle = hardwareMap.get(ExpansionHubServo.class, "RightAngle");
 
-        LeftHook.setPosition(LeftHookDisengaged);
-        RightHook.setPosition(RightHookDisengaged);
 
         // TODO: if desired, use setLocalizer() to change the localization method
 //        setLocalizer(new MecanumLocalizer(this, true));
@@ -177,9 +143,11 @@ public class SampleMecanumDriveREVOptimized extends SampleMecanumDriveBase {
         }
     }
 
+    @NonNull
     @Override
     public List<Double> getWheelPositions() {
-        RevBulkData bulkData = hub.getBulkInputData();
+        RevBulkData bulkData = ExpansionHub1.getBulkInputData();
+
 
         if (bulkData == null) {
             return Arrays.asList(0.0, 0.0, 0.0, 0.0);
@@ -194,7 +162,7 @@ public class SampleMecanumDriveREVOptimized extends SampleMecanumDriveBase {
 
     @Override
     public List<Double> getWheelVelocities() {
-        RevBulkData bulkData = hub.getBulkInputData();
+        RevBulkData bulkData = ExpansionHub1.getBulkInputData();
 
         if (bulkData == null) {
             return Arrays.asList(0.0, 0.0, 0.0, 0.0);

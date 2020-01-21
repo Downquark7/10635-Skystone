@@ -51,12 +51,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
-/**
- * Modified by Downquark7 from the sample into something that's probably a lot easier to use, however will be missing some features
- */
-
-enum Position {Left, Right, Center, Unknown}
-
 public class vuforiaLib {
 
     // IMPORTANT:  For Phone Camera, set 1) the camera source and 2) the orientation, based on how your phone is mounted:

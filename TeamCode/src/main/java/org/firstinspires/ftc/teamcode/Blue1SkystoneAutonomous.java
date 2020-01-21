@@ -1,37 +1,28 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREVOptimized;
+import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREVOptimized2;
 
-// @Autonomous
-public class blueAutonomous extends LinearOpMode {
-    RobotConfig robot = new RobotConfig();
+@Autonomous
+public class Blue1SkystoneAutonomous extends LinearOpMode {
+
+    RobotConfig2 robot = new RobotConfig2();
+
     final double blockWidth = 8;
     private vuforiaLib vuforia = new vuforiaLib();
-    SampleMecanumDriveREVOptimized drive;
+    SampleMecanumDriveREVOptimized2 drive;
 
-    int color = 1;
 
     public void runOpMode() {
         vuforia.init(this);
-        drive = new SampleMecanumDriveREVOptimized(hardwareMap);
+        drive = new SampleMecanumDriveREVOptimized2(hardwareMap);
 
-        while (!isStarted()) { //use this for switching between red and blue sides
-            if (isStopRequested())
-                return;
-
-//            if (gamepad1.a)
-//                color = 1;
-//            if (gamepad1.b)
-//                color = -1;
-//
-//            telemetry.addData("color", color == 1 ? "red" : "blue");
-            telemetry.update();
-        }
+        robot.init(hardwareMap);
 
         vuforia.start();
         waitForStart();
@@ -39,17 +30,22 @@ public class blueAutonomous extends LinearOpMode {
             return;
 
         drive.setPoseEstimate(new Pose2d(63.5, 39, Math.PI));
+
         drive.followTrajectorySync(drive.trajectoryBuilder().forward(16).build());
 
-//  scan for stone order
+//         scan for stone order
         Position order = vuforia.getPosition(-19.8, -13, -2.8);//get numbers using getVuforiaNumbers teleop
         vuforia.stopVuforia();
-// drive forward to make room for strafing
-//        justMove(-27, 0, 0);
-// strafe towards chosen skystone
+
         drive.LeftIntake.setPower(1);
         drive.RightIntake.setPower(1);
-        drive.Gripper.setPosition(drive.GripperOpen);
+
+        drive.Gripper.setPosition(robot.GripperOpen);
+        drive.Wrist.setPosition(robot.WristCollectionPosition);
+
+        drive.LeftHook.setPosition(robot.LeftHookDisengaged);
+        drive.RightHook.setPosition(robot.RightHookDisengaged);
+
         switch (order) {
             case Left:
                 drive.followTrajectorySync(drive.trajectoryBuilder().splineTo(new Pose2d(31, 52 - blockWidth * 2, 0.55 + Math.PI)).forward(6).build());
@@ -65,33 +61,37 @@ public class blueAutonomous extends LinearOpMode {
                 drive.followTrajectorySync(drive.trajectoryBuilder().splineTo(new Pose2d(31, 52 - blockWidth * 0 * Math.random(), 0.55 + Math.PI)).forward(6).build());
         }
 //        drive.followTrajectorySync(drive.trajectoryBuilder().forward(6).build());
-        drive.Gripper.setPosition(drive.GripperClosed);
+
+        robot.Gripper.setPosition(robot.GripperClosed);
+
         drive.followTrajectorySync(drive.trajectoryBuilder().back(13).setReversed(true).splineTo(new Pose2d(40, -10, Math.PI / 2)).build());
+
         drive.LeftLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         drive.RightLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        drive.LeftLift.setTargetPosition((int) (1.2 * drive.LiftTicksPerInch * drive.MinimumElbowMovementHeightIN));
-        drive.RightLift.setTargetPosition((int) (1.2 * drive.LiftTicksPerInch * drive.MinimumElbowMovementHeightIN));
+        drive.LeftLift.setTargetPosition((int) (1.2 * robot.LiftTicksPerInch * robot.MinimumTopSlideMovementHeightIN));
+        drive.RightLift.setTargetPosition((int) (1.2 * robot.LiftTicksPerInch * robot.MinimumTopSlideMovementHeightIN));
         drive.LeftLift.setPower(1);
         drive.RightLift.setPower(1);
+
         drive.followTrajectorySync(drive.trajectoryBuilder().setReversed(true).splineTo(new Pose2d(27, -46, 0)).build());
 
-        drive.LeftHook.setPosition(drive.LeftHookEngaged);
-        drive.RightHook.setPosition(drive.RightHookEngaged);
+        drive.LeftHook.setPosition(robot.LeftHookEngaged);
+        drive.RightHook.setPosition(robot.RightHookEngaged);
 
         drive.followTrajectory(drive.trajectoryBuilder().forward(30).build());
-        ElapsedTime elbowTime = new ElapsedTime();
-        elbowTime.reset();
-        drive.Elbow.setPosition(drive.ElbowExtend);
-        while (elbowTime.seconds() < 1.5)
+        ElapsedTime TopSlideTime = new ElapsedTime();
+        TopSlideTime.reset();
+        drive.TopSlide.setPosition(robot.TopSlideExtendPower);
+        while (TopSlideTime.seconds() < 1.5)
             drive.update();
-        drive.Wrist.setPosition(drive.WristFrontDepositPosition);
-        while (elbowTime.seconds() < 2)
+        drive.Wrist.setPosition(robot.WristNormalDepositPosition);
+        while (TopSlideTime.seconds() < 2)
             drive.update();
-        drive.Elbow.setPosition(0.5);
+        drive.TopSlide.setPosition(0.5);
         drive.Gripper.setPosition(robot.GripperOpen);
-//        while (elbowTime.seconds() < 3)
+//        while (TopSlideTime.seconds() < 3)
 //            drive.update();
-//        drive.Elbow.setPosition(drive.ElbowRetract);
+//        drive.TopSlide.setPosition(drive.TopSlideRetract);
 
         drive.waitForIdle();
 
@@ -99,27 +99,27 @@ public class blueAutonomous extends LinearOpMode {
 
         while (drive.getPoseEstimate().getHeading() < Math.PI / 2 || drive.getPoseEstimate().getHeading() > Math.PI) {
             drive.updatePoseEstimate();
-//            if (elbowTime.seconds() > 3) {
-//                drive.Elbow.setPosition(0.5);
+//            if (TopSlideTime.seconds() > 3) {
+//                drive.TopSlide.setPosition(0.5);
 //                drive.LeftLift.setTargetPosition(0);
 //                drive.RightLift.setTargetPosition(0);
 //                drive.LeftLift.setPower(.3);
 //                drive.RightLift.setPower(.3);
-//                elbowTime.reset();
+//                TopSlideTime.reset();
 //            }
         }
         drive.setMotorPowers(0, 0, 0, 0);
 
-        drive.Wrist.setPosition(drive.WristCollectionPosition);
-        drive.Elbow.setPosition(0.5);
-        drive.LeftLift.setTargetPosition((int) (16 * drive.LiftTicksPerInch));
-        drive.RightLift.setTargetPosition((int) (16 * drive.LiftTicksPerInch));
+        drive.Wrist.setPosition(robot.WristCollectionPosition);
+        drive.TopSlide.setPosition(0.5);
+        drive.LeftLift.setTargetPosition((int) (16 * robot.LiftTicksPerInch));
+        drive.RightLift.setTargetPosition((int) (16 * robot.LiftTicksPerInch));
         drive.LeftLift.setPower(1);
         drive.RightLift.setPower(1);
 
 
-        drive.LeftHook.setPosition(drive.LeftHookDisengaged);
-        drive.RightHook.setPosition(drive.RightHookDisengaged);
+        drive.LeftHook.setPosition(robot.LeftHookDisengaged);
+        drive.RightHook.setPosition(robot.RightHookDisengaged);
 
         drive.followTrajectorySync(drive.trajectoryBuilder().back(20)/*.build());
         drive.followTrajectorySync(drive.trajectoryBuilder()*/.forward(44).build());

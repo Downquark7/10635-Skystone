@@ -2,13 +2,12 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.lynx.LynxEmbeddedIMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 
-@TeleOp
+// @TeleOp
 public class MattandEvanTeleOpRemastered extends LinearOpMode {
 
 
@@ -305,7 +304,7 @@ public class MattandEvanTeleOpRemastered extends LinearOpMode {
                 if (prevElbowEnc != elbowPosition || elbowTimer.seconds() > 2)
                     elbowTimer.reset();
                 prevElbowEnc = elbowPosition;
-                if (elbowTimer.milliseconds() > 300) {
+                if (elbowTimer.milliseconds() > 100) {
 //                    elbowEncOffset = robot.LeftIntake.getCurrentPosition();
 //                }
 //                if (elbowExtended ? elbowPosition > robot.ElbowExtended : elbowPosition < 10) {
@@ -362,6 +361,13 @@ public class MattandEvanTeleOpRemastered extends LinearOpMode {
 //        if (gamepad1.left_bumper && IntakePreviousLoopState == 2 && !Gamepad1LeftBumperPreviousLoopState) {
 //            robot.LeftIntake.setPower(0);
 //            robot.RightIntake.setPower(0);
+
+
+
+
+
+
+
 //            IntakePreviousLoopState = 0;
 //            Gamepad1LeftBumperPreviousLoopState = true;
 //        }

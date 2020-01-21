@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.drive.mecanum;
 
-import android.support.annotation.NonNull;
-
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,7 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 import org.firstinspires.ftc.teamcode.util.LynxModuleUtil;
 
 import java.util.ArrayList;
@@ -84,7 +81,6 @@ public class SampleMecanumDriveREV extends SampleMecanumDriveBase {
         }
     }
 
-    @NonNull
     @Override
     public List<Double> getWheelPositions() {
         List<Double> wheelPositions = new ArrayList<>();

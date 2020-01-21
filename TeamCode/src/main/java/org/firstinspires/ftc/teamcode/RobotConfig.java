@@ -22,6 +22,8 @@ public class RobotConfig
     public Servo Elbow       = null;
     public Servo RightHook   = null;
     public Servo LeftHook   = null;
+    public Servo LeftAngle = null;
+    public Servo RightAngle = null;
 
     public double GripperOpen = 1;
     public double GripperClosed = .64;
@@ -48,7 +50,7 @@ public class RobotConfig
 
 
     double SpoolDiameterIN = 1.25;
-    double LiftMotorTicksPerRotationofOuputShaft = 753.2;         // for gobilda 13.7:1 Motor
+    double LiftMotorTicksPerRotationofOuputShaft = 537.6;         // for gobilda 19.2:1 Motor
 
     double LiftTicksPerInch = LiftMotorTicksPerRotationofOuputShaft / (SpoolDiameterIN * Math.PI);
 
@@ -119,6 +121,9 @@ public class RobotConfig
         Elbow = hwMap.get(Servo.class, "Elbow");
         LeftHook = hwMap.get(Servo.class,"LeftHook");
         RightHook = hwMap.get(Servo.class,"RightHook");
+
+        RightAngle = hwMap.get(Servo.class, "RightAngle");
+        LeftAngle = hwMap.get(Servo.class, "LeftIntake");
 
         LeftHook.setPosition(LeftHookDisengaged);
         RightHook.setPosition(RightHookDisengaged);

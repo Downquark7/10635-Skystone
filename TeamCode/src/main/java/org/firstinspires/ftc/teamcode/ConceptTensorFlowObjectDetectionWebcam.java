@@ -29,7 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -51,8 +50,7 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@TeleOp(name = "Concept: TensorFlow Object Detection Webcam", group = "Concept")
-//@Disabled
+@TeleOp
 public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Stone";
@@ -110,8 +108,6 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        switchViewArea(Position.Unknown, tfod);
-
         if (opModeIsActive()) {
             while (opModeIsActive()) {
                 if (tfod != null) {
@@ -123,7 +119,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
                         // step through the list of recognitions and display boundary info.
                         int i = 0;
                         for (Recognition recognition : updatedRecognitions) {
-                            telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                            telemetry.addData(String.format("label (%d) at %f", i, recognition.getConfidence()), recognition.getLabel());
                             telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
                                     recognition.getLeft(), recognition.getTop());
                             telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
@@ -165,26 +161,26 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minimumConfidence = 0.8;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
+
     }
 
     enum Position {Left, Right, Center, Unknown}
 
-    public void switchViewArea(Position position, TFObjectDetector tfod) {
+    public int[] getViewArea(Position position) {
         switch (position) {
             case Left:
-                tfod.setClippingMargins(200, 100, 420, 270);//left
-                break;
+                int[] out = {200, 100, 420, 270};
+                return out;
             case Center:
-                tfod.setClippingMargins(350, 100, 570, 270);//center
-                break;
-            case Right:
-                tfod.setClippingMargins(500, 100, 700, 270);//right
-                break;
-            default:
-                tfod.setClippingMargins(100, 100, 700, 270);
+                int[] out1 = {350, 100, 570, 270};
+                return out1;
+            default://case Right:
+                int[] out2 = {500, 100, 700, 270};
+                return out2;
         }
     }
+
+
 }

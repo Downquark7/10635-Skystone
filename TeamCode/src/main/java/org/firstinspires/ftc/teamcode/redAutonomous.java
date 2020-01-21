@@ -1,14 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREVOptimized;
 
-@Autonomous
+// @Autonomous
 public class redAutonomous extends LinearOpMode {
     RobotConfig robot = new RobotConfig();
     final double blockWidth = 8;
@@ -51,6 +50,8 @@ public class redAutonomous extends LinearOpMode {
         drive.LeftIntake.setPower(1);
         drive.RightIntake.setPower(1);
         drive.Gripper.setPosition(drive.GripperOpen);
+        robot.LeftAngle.setPosition(drive.LeftAngleIntake);
+        robot.RightAngle.setPosition(drive.RightAngleIntake);
         switch (order) {
             case Left:
                 drive.followTrajectorySync(drive.trajectoryBuilder().splineTo(new Pose2d(-31, 52 - blockWidth * 0, -0.55)).forward(6).build());
