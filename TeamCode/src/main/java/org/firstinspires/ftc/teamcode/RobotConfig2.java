@@ -44,13 +44,14 @@ public class RobotConfig2 {
     public double RightHookDisengaged = .32;
     public double RightHookEngaged = .62;
 
-    public double LeftAngleOpen = 0.65;
-    public double LeftAngleIntake = 0.68;
-    public double LeftAngleGripped = 0.69;
+    public double LeftAngleOpen = 0.69833;
+    public double LeftAngleIntake = 0.71722;
+    public double LeftAngleGripped = 0.72722;
+    public double LeftAngleScanning = .71722;
 
-    public double RightAngleOpen = 0.79;
-    public double RightAngleIntake = 0.76;
-    public double RightAngleGripped = 0.75;
+    public double RightAngleOpen = 0.80777;
+    public double RightAngleIntake = 0.79333;
+    public double RightAngleGripped = 0.76944;
 
     double LiftPIDPower = .1;     // Lower this number if the lift acts jerky when you are not touching the controller, raise it if the lift falls when you are not touching the controller
 
@@ -113,7 +114,7 @@ public class RobotConfig2 {
         RightHook = hwMap.get(Servo.class, "RightHook");
 
         RightAngle = hwMap.get(Servo.class, "RightAngle");
-        LeftAngle = hwMap.get(Servo.class, "LeftIntake");
+        LeftAngle = hwMap.get(Servo.class, "LeftAngle");
 
         FrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         FrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

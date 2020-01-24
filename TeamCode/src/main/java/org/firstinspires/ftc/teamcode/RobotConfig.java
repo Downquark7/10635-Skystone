@@ -123,7 +123,7 @@ public class RobotConfig
         RightHook = hwMap.get(Servo.class,"RightHook");
 
         RightAngle = hwMap.get(Servo.class, "RightAngle");
-        LeftAngle = hwMap.get(Servo.class, "LeftIntake");
+        LeftAngle = hwMap.get(Servo.class, "LeftAngle");
 
         LeftHook.setPosition(LeftHookDisengaged);
         RightHook.setPosition(RightHookDisengaged);

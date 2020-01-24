@@ -84,6 +84,9 @@ public class MattTeleopRevExt2 extends LinearOpMode {
         robot.LeftAngle.setPosition(robot.LeftAngleIntake);
         robot.RightAngle.setPosition(robot.RightAngleIntake);
 
+        robot.LeftAngle.setPosition(robot.LeftAngleIntake);
+        robot.RightAngle.setPosition(robot.RightAngleIntake);
+
         telemetry.addData("Say", "Initialization Complete");
         telemetry.addData("Gripper Position", () -> robot.Gripper.getPosition());
         telemetry.addData("Wrist Position", () -> robot.Wrist.getPosition());
@@ -129,6 +132,9 @@ public class MattTeleopRevExt2 extends LinearOpMode {
             if (isStopRequested()) {
                 return;
             }
+
+            robot.LeftAngle.setPosition(robot.LeftAngleIntake);
+            robot.RightAngle.setPosition(robot.RightAngleIntake);
 
             robot.LiftPositionIN = (bulkData2.getMotorCurrentPosition(robot.LeftLift) + bulkData2.getMotorCurrentPosition(robot.RightLift)) / (2 * robot.LiftTicksPerInch);
 

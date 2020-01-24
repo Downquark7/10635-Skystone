@@ -58,59 +58,57 @@ public class LiftManager {
     }
 
     public void start(double liftTargetIN) {
-        RightLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LeftLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        RightLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        LeftLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.liftTargetIN = liftTargetIN;
-        int LiftTarget = (int) Math.round(liftTargetIN * LiftTicksPerInch);
-        LeftLift.setTargetPosition(LiftTarget);
-        RightLift.setTargetPosition(LiftTarget);
-        LeftLift.setPower(pidPower);
-        RightLift.setPower(pidPower);
+        LeftLift.setPower(0);
+        RightLift.setPower(0);
     }
 
     public void update(RevBulkData bulkData2) {
 
 
-        LiftPositionIN = Math.max(LeftLift.getCurrentPosition(), RightLift.getCurrentPosition()) / LiftTicksPerInch;
-        SlidePositionIN = bulkData2.getMotorCurrentPosition(SlideEncoder) / SlideTicksPerInch;
+        LiftPositionIN = Math.PI * 1.25 * Math.max(LeftLift.getCurrentPosition(), RightLift.getCurrentPosition()) / 537.6;
+        SlidePositionIN = Math.PI * 1.25 * bulkData2.getMotorCurrentPosition(SlideEncoder) / 360;
 
-        boolean liftObstruction = SlidePositionIN < 6 && SlidePositionIN > 1;
-        boolean slideObstruction = false;
+        boolean liftObstruction = SlidePositionIN > 1;
+        boolean slideObstruction = LiftPositionIN < 6;
+        int LiftTarget = (int) Math.round(liftTargetIN * LiftTicksPerInch);
 
-        if (liftObstruction) {
-            if (liftTargetIN < 6 && LiftPositionIN < 6) {
-                int LiftTarget = (int) Math.round(7 * LiftTicksPerInch);
-                LeftLift.setTargetPosition(LiftTarget);
-                RightLift.setTargetPosition(LiftTarget);
-            } else if (LiftPositionIN < 6) {
-                slideObstruction = true;
-            }
+        if (liftObstruction && liftTargetIN < 6 && LiftPositionIN < 6) {
+                LeftLift.setPower(0.5);
+                RightLift.setPower(0.5);
+        } else if (liftObstruction && liftTargetIN < 6 && LiftPositionIN < 8) {
+            LeftLift.setPower(0);
+            RightLift.setPower(0);
         } else {
-            int LiftTarget = (int) Math.round(liftTargetIN * LiftTicksPerInch);
-            LeftLift.setTargetPosition(LiftTarget);
-            RightLift.setTargetPosition(LiftTarget);
+
+            //LeftLift.setTargetPosition(LiftTarget);
+            //RightLift.setTargetPosition(LiftTarget);
+
+
+            double liftOffset = (bulkData2.getMotorCurrentPosition(LeftLift) - bulkData2.getMotorCurrentPosition(RightLift)) / (LeftLift.getMotorType().getTicksPerRev());
+
+            liftPower = (liftTargetIN - LiftPositionIN);
+
+            LeftLift.setPower(liftPower + Math.max(0, -liftOffset));
+            RightLift.setPower(liftPower + Math.max(0, liftOffset));
         }
-
-
-        double liftOffset = (bulkData2.getMotorCurrentPosition(LeftLift) - bulkData2.getMotorCurrentPosition(RightLift)) / (LeftLift.getMotorType().getTicksPerRev());
-
-        LeftLift.setPower(liftPower + Math.max(0, -liftOffset));
-        RightLift.setPower(liftPower + Math.max(0, liftOffset));
 
         if (Math.abs(LiftPositionIN - liftTargetIN) < tolerance) {
             isBusy = false;
-            LeftLift.setPower(pidPower);
-            RightLift.setPower(pidPower);
+            LeftLift.setPower(0);
+            RightLift.setPower(0);
             liftPower = pidPower;
         } else
             isBusy = true;
 
-        if (Math.abs(SlidePositionIN - slideTargetIN) < .15 || slideObstruction) {
+        if (Math.abs(SlidePositionIN - slideTargetIN) < .5 || slideObstruction) {
             Elbow.setPosition(0.5);
         } else {
             Elbow.setPosition(Range.clip(
                     Range.scale(
-                            (slideTargetIN - SlidePositionIN), -1, 1, 0.2, 0.8),
+                            (slideTargetIN - SlidePositionIN), -2, 2, 0.2, 0.8),
                     0.2, 0.8));
             isBusy = true;
         }

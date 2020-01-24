@@ -9,42 +9,55 @@ import org.openftc.revextensions2.RevBulkData;
 
 
 @Autonomous
-public class bestAutonomous extends LinearOpMode {
+public class bestAutonomous extends LinearOpMode {     // assuming blue for now
 
     SampleMecanumDriveREVOptimized drive;
-    LiftManager lift = new LiftManager(drive.LeftLift, drive.RightLift, drive.Elbow, drive.LeftIntake);
-    //fill in these positions!              // i will when i get to nicoles
-    Pose2d startPosition = new Pose2d();
+    LiftManager lift;
 
-    Pose2d firstLeftPickup = new Pose2d();
-    Pose2d firstCenterPickup = new Pose2d();
-    Pose2d firstRightPickup = new Pose2d();
 
-    Pose2d secondLeftPickup = new Pose2d();
-    Pose2d secondCenterPickup = new Pose2d();
-    Pose2d secondRightPickup = new Pose2d();
+    Pose2d startPosition = new Pose2d(64,36, Math.PI);
 
-    Pose2d underBridge = new Pose2d(-40, -10, Math.PI / 2);//lift can move up here so don't break it
+    Pose2d firstLeftPickup = new Pose2d(36,40.5,Math.PI - .56);
+    Pose2d firstCenterPickup = new Pose2d(36,48.5, Math.PI - .56);
+    Pose2d firstRightPickup = new Pose2d(36,58 ,Math.PI - .545);
 
-    Pose2d quickDeposit = new Pose2d();
-    Pose2d getWhateverItIsCalled = new Pose2d();  // the red or blue bumpy thingy
+    Pose2d secondLeftPickup = new Pose2d(36,35,Math.PI - .56);
+    Pose2d secondCenterPickup = new Pose2d(36,27,Math.PI - .56);
+    Pose2d secondRightPickup = new Pose2d(36,18,Math.PI - .56);
+
+    Pose2d underBridge = new Pose2d(40, -10, Math.PI / 2);           //lift can move up here so don't break it
+
+    Pose2d quickDeposit = new Pose2d(33,-47,0);
+    Pose2d getWhateverItIsCalled = new Pose2d(30,-47,0);  // the red or blue bumpy thingy
 
     void turnOnIntake() {
         drive.LeftIntake.setPower(1);
         drive.RightIntake.setPower(1);
         drive.Gripper.setPosition(drive.GripperOpen);
+        drive.LeftAngle.setPosition(drive.LeftAngleIntake);
+        drive.RightAngle.setPosition(drive.RightAngleIntake);
     }
 
     void turnOffIntake() {
         drive.Gripper.setPosition(drive.GripperClosed);
-        sleep(1000);
+        sleep(100);
         drive.LeftIntake.setPower(0);
         drive.RightIntake.setPower(0);
     }
 
+    boolean LiftStarted = false;
+
     @Override
     public void runOpMode() throws InterruptedException {
+
+
         drive = new SampleMecanumDriveREVOptimized(hardwareMap);
+        lift = new LiftManager(drive.LeftLift, drive.RightLift, drive.Elbow, drive.LeftIntake);
+
+
+
+        drive.setPoseEstimate(startPosition);
+
         Position pos = Position.Unknown;
 
         Pose2d firstStonePosition;
@@ -80,18 +93,71 @@ public class bestAutonomous extends LinearOpMode {
         }
 
         turnOnIntake();
-        drive.followTrajectorySync(drive.trajectoryBuilder().splineTo(firstStonePosition).build());//go pickup stone
+        drive.followTrajectorySync(drive.trajectoryBuilder().splineTo(firstStonePosition).forward(8).build()); //go pickup stone
         drive.update();
-        turnOffIntake();//grab
+        turnOffIntake(); //grab
 
         drive.followTrajectory(drive.trajectoryBuilder().reverse().splineTo(underBridge).splineTo(quickDeposit).build());//all in reverse
 
-        lift.start(7);
         lift.slideTargetIN = 14;  // the number you are looking for is 14
+
+        lift.start(7);
         //deposit first skystone
         while (lift.isBusy || drive.isBusy()) {
             if (drive.getPoseEstimate().getY() < underBridge.getY()) {//only run code after passed bridge
                 RevBulkData bulkData = drive.hub2.getBulkInputData();
+                drive.LeftAngle.setPosition(drive.LeftAngleOpen);
+                drive.RightAngle.setPosition(drive.RightAngleOpen);
+                telemetry.addData("LeftLift Encoder", bulkData.getMotorCurrentPosition(drive.LeftLift));
+                telemetry.addData("RightLift Encoder", bulkData.getMotorCurrentPosition(drive.RightLift));
+                telemetry.addData("LiftManager Target Height IN", lift.liftTargetIN);
+                telemetry.addData("LiftManager Current Height", lift.LiftPositionIN);
+                telemetry.update();
+
+                if (LiftStarted = false){
+                    LiftStarted = true;
+                }
+
+                lift.update(bulkData);//updates lift and slide checking for collisions
+                if (lift.SlidePositionIN > 12)
+                    drive.Wrist.setPosition(drive.WristFrontDepositPosition);
+            }
+            drive.update();
+        }
+        lift.stop();
+
+        drive.update();
+        drive.Gripper.setPosition(drive.GripperOpen);//drop first skystone
+        sleep(100);
+        drive.Wrist.setPosition(drive.WristCollectionPosition);
+
+        turnOnIntake();
+        lift.liftTargetIN = 0;
+        lift.slideTargetIN = 0;
+        drive.followTrajectory(drive.trajectoryBuilder().splineTo(underBridge).splineTo(secondStonePosition).forward(8).build());
+        while (lift.isBusy || drive.isBusy()) {
+            RevBulkData bulkData = drive.hub2.getBulkInputData();
+            if (bulkData != null) {
+                lift.update(bulkData);
+            }
+            drive.update();
+        }
+        //make sure this part works because if it doesn't the next part will kill it
+        //there's only so much code I'm willing to test at once
+
+        //select lines and Ctrl+/ to comment/uncomment lines without wasting time
+        turnOffIntake();//grab
+
+        drive.followTrajectory(drive.trajectoryBuilder().reverse().splineTo(underBridge).splineTo(getWhateverItIsCalled).build());//all in reverse
+
+        lift.start(12);
+        lift.slideTargetIN = 14;  // the number you are looking for is 14
+        //deposit second skystone
+        while (lift.isBusy || drive.isBusy()) {
+            if (drive.getPoseEstimate().getY() < underBridge.getY()) {//only run code after passed bridge
+                RevBulkData bulkData = drive.hub2.getBulkInputData();
+        drive.LeftAngle.setPosition(drive.LeftAngleOpen);
+        drive.RightAngle.setPosition(drive.RightAngleOpen);
                 if (bulkData != null) {
                     lift.update(bulkData);//updates lift and slide checking for collisions
                     if (lift.SlidePositionIN > 12)
@@ -100,74 +166,38 @@ public class bestAutonomous extends LinearOpMode {
             }
             drive.update();
         }
-        drive.update();
-        drive.Gripper.setPosition(drive.GripperOpen);//drop first skystone
-        sleep(100);
+        drive.Gripper.setPosition(drive.GripperOpen);
+        drive.LeftHook.setPosition(drive.LeftHookEngaged);
+        drive.RightHook.setPosition(drive.RightHookEngaged);
+        sleep(500);
         drive.Wrist.setPosition(drive.WristCollectionPosition);
-
+        drive.followTrajectory(drive.trajectoryBuilder().forward(30).build());
         lift.liftTargetIN = 0;
         lift.slideTargetIN = 0;
-        drive.followTrajectory(drive.trajectoryBuilder().splineTo(underBridge).build());
-        while (lift.isBusy || drive.isBusy()) {
+        while (drive.isBusy()) {
             RevBulkData bulkData = drive.hub2.getBulkInputData();
             if (bulkData != null) {
                 lift.update(bulkData);
             }
             drive.update();
         }
-        turnOnIntake();
-        //make sure this part works because if it doesn't the next part will kill it
-        //there's only so much code I'm willing to test at once
 
-        //select lines and Ctrl+/ to comment/uncomment lines without wasting time
-//        drive.followTrajectorySync(drive.trajectoryBuilder().splineTo(secondStonePosition).build());
-//        turnOffIntake();//grab
-//
-//        drive.followTrajectory(drive.trajectoryBuilder().reverse().splineTo(underBridge).splineTo(getWhateverItIsCalled).build());//all in reverse
-//
-//        lift.start(7);
-//        lift.slideTargetIN = 14;  // the number you are looking for is 14
-//        //deposit second skystone
-//        while (lift.isBusy || drive.isBusy()) {
-//            if (drive.getPoseEstimate().getY() < underBridge.getY()) {//only run code after passed bridge
-//                RevBulkData bulkData = drive.hub2.getBulkInputData();
-//                if (bulkData != null) {
-//                    lift.update(bulkData);//updates lift and slide checking for collisions
-//                    if (lift.SlidePositionIN > 12)
-//                        drive.Wrist.setPosition(drive.WristFrontDepositPosition);
-//                }
-//            }
-//            drive.update();
-//        }
-//        drive.Gripper.setPosition(drive.GripperOpen);
-//        drive.LeftHook.setPosition(drive.LeftHookEngaged);
-//        drive.RightHook.setPosition(drive.RightHookEngaged);
-//        sleep(500);
-//        drive.Wrist.setPosition(drive.WristCollectionPosition);
-//        drive.followTrajectory(drive.trajectoryBuilder().forward(30).build());
-//        lift.liftTargetIN = 0;
-//        lift.slideTargetIN = 0;
-//        while (drive.isBusy()) {
-//            RevBulkData bulkData = drive.hub2.getBulkInputData();
-//            if (bulkData != null) {
-//                lift.update(bulkData);
-//            }
-//            drive.update();
-//        }
-//
-//        drive.setMotorPowers(1, 1, -1, -1);
-//        while (drive.getPoseEstimate().getHeading() > Math.PI / 2) {
-//            RevBulkData bulkData = drive.hub2.getBulkInputData();
-//            if (bulkData != null) {
-//                lift.update(bulkData);
-//            }
-//            drive.updatePoseEstimate();
-//        }
-//        drive.setMotorPowers(0, 0, 0, 0);
+        drive.setMotorPowers(-1, -1, 1, 1);
+        while (drive.getPoseEstimate().getHeading() < Math.PI / 2 || drive.getPoseEstimate().getHeading() > Math.PI) {
+            RevBulkData bulkData = drive.hub2.getBulkInputData();
+            if (bulkData != null) {
+                lift.update(bulkData);
+            }
+            drive.updatePoseEstimate();
+        }
+        drive.setMotorPowers(0, 0, 0, 0);
 
-        //check up to here before adding the last part
-//        lift.stop();
-//        drive.followTrajectorySync(drive.trajectoryBuilder().back(15).forward(44).build());
+//        check up to here before adding the last part
+        lift.stop();
+        drive.LeftHook.setPosition(drive.LeftHookDisengaged);
+        drive.RightHook.setPosition(drive.RightHookDisengaged);
+        drive.followTrajectorySync(drive.trajectoryBuilder().back(15).forward(44).build());
+
 
     }
 }

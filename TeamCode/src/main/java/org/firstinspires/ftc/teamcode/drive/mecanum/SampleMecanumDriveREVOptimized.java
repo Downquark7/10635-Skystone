@@ -66,13 +66,14 @@ public class SampleMecanumDriveREVOptimized extends SampleMecanumDriveBase {
     public double RightHookDisengaged = .32;                                         //tbd
     public double RightHookEngaged = .62;                                            // tbd
 
-    public double LeftAngleOpen = 0.65;
-    public double LeftAngleIntake = 0.68;
-    public double LeftAngleGripped = 0.69;
+    public double LeftAngleOpen = 0.69833;
+    public double LeftAngleIntake = 0.71722;
+    public double LeftAngleGripped = 0.72722;
+    public double LeftAngleScanning = .71722;
 
-    public double RightAngleOpen = 0.79;
-    public double RightAngleIntake = 0.76;
-    public double RightAngleGripped = 0.75;
+    public double RightAngleOpen = 0.80777;
+    public double RightAngleIntake = 0.79333;
+    public double RightAngleGripped = 0.76944;
 
     double SpoolDiameterIN = 1.25;
     double LiftMotorTicksPerRotationofOuputShaft = 537.6;         // for gobilda 19.2:1 Motor
